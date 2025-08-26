@@ -1,4 +1,4 @@
-from penguin_template import Penguin
+from .penguin_template import Penguin
 
 penguin = Penguin(
     name="Common",
