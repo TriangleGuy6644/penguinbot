@@ -6,7 +6,7 @@ import json
 import dotenv
 import time
 import os
-
+import asyncio
 # ----------------------------
 # Initialize dotenv
 # ----------------------------
@@ -101,22 +101,34 @@ async def forcespawn(ctx):
     await ctx.send(penguin.spawn_message())
     await ctx.send(penguin.image_url)
 
+
 # ----------------------------
 # Penguin Spawning (auto)
 # ----------------------------
-@tasks.loop(seconds=random.randint(30, 90))
+@tasks.loop()
 async def spawn_penguin():
     global current_penguin, spawn_time
-    if spawn_channel_id is None:
-        return
+    while True:  # infinite loop inside the task
+        # wait a random time between 5 and 20 minutes
+        wait_time = random.randint(5*60, 20*60)  # seconds
+        await asyncio.sleep(wait_time)
 
-    channel = bot.get_channel(spawn_channel_id)
-    if current_penguin is None and channel is not None:
+        if spawn_channel_id is None:
+            continue
+
+        if current_penguin is not None:
+            continue  # skip if a penguin is still active
+
+        channel = bot.get_channel(spawn_channel_id)
+        if channel is None:
+            continue
+
         penguin = random.choice(penguins)
         current_penguin = penguin
         spawn_time = time.time()
         await channel.send(penguin.spawn_message())
         await channel.send(penguin.image_url)
+
 
 # ----------------------------
 # Catching Penguins
